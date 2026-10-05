@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>OmniCalc — All-in-One Calculator</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Segoe UI,Arial,sans-serif
+}
+
+body{
+    min-height:100vh;
+    color:#fff;
+    background:
+    radial-gradient(circle at 10% 10%,#38257a55,transparent 30%),
+    radial-gradient(circle at 90% 90%,#006d8850,transparent 30%),
+    #070711;
+    padding:20px;
+}
+
+.app{
+    max-width:1100px;
+    margin:auto
+}
+
+header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 4px 22px;
+    gap:15px
+}
+
+.logo{
+    font-size:27px;
+    font-weight:800
+}
+
+.logo span{
+    color:#8870ff
+}
+
+.tag{
+    font-size:11px;
+    color:#aaa1ff;
+    border:1px solid #7161bb55;
+    padding:7px 11px;
+    border-radius:20px;
+    background:#7161bb15
+}
+
+.tabs{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:15px;
+    scrollbar-width:none
+}
+
+.tabs::-webkit-scrollbar{
+    display:none
+}
+
+.tab{
+    flex:0 0 auto;
+    padding:11px 16px;
+    border:1px solid #ffffff0d;
+    border-radius:14px;
+    background:#ffffff08;
+    color:#aaa;
+    cursor:pointer;
+    font-weight:600
+}
+
+.tab.active{
+    color:#fff;
+    background:#765bff33;
+    border-color:#816aff66
+}
+
+.panel{
+    display:none;
+    background:#10101dba;
+    border:1px solid #ffffff10;
+    border-radius:28px;
+    padding:22px;
+    backdrop-filter:blur(20px);
+    box-shadow:0 25px 70px #0008
+}
+
+.panel.active{
+    display:block
+}
+
+h2{
+    margin-bottom:18px;
+    font-size:21px
+}
+
+.display{
+    min-height:120px;
+    background:#05050b66;
+    border:1px solid #ffffff0a;
+    border-radius:20px;
+    padding:18px;
+    text-align:right;
+    display:flex;
+    flex-direction:column;
+    justify-content:end;
+    margin-bottom:15px;
+    overflow:hidden
+}
+
+.prev{
+    color:#77778b;
+    font-size:14px;
+    min-height:22px
+}
+
+.current{
+    font-size:43px;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden
+}
+
+.keys{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px
+}
+
+button{
+    min-height:56px;
+    border:0;
+    border-radius:16px;
+    color:#fff;
+    background:#ffffff0b;
+    border:1px solid #ffffff08;
+    font-size:18px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.15s
+}
+
+button:hover{
+    background:#ffffff16
+}
+
+button:active{
+    transform:scale(.94)
+}
+
+.op{
+    background:#684dceaa
+}
+
+.eq{
+    background:linear-gradient(135deg,#7657ff,#4c35bd)
+}
+
+.wide{
+    grid-column:span 2
+}
+
+.scientific{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:9px;
+    margin-bottom:10px
+}
+
+.scientific button{
+    font-size:14px;
+    min-height:48px
+}
+
+.form{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px
+}
+
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:7px
+}
+
+.field label{
+    font-size:13px;
+    color:#aaa
+}
+
+input,select{
+    width:100%;
+    padding:14px;
+    border-radius:14px;
+    border:1px solid #ffffff12;
+    background:#080812;
+    color:#fff;
+    outline:none;
+    font-size:16px
+}
+
+input:focus,select:focus{
+    border-color:#806cff
+}
+
+.calculate{
+    margin-top:16px;
+    width:100%;
+    background:linear-gradient(135deg,#7657ff,#4c35bd)
+}
+
+.result{
+    margin-top:16px;
+    padding:18px;
+    border-radius:17px;
+    background:#7657ff14;
+    border:1px solid #7657ff30;
+    font-size:18px;
+    line-height:1.7
+}
+
+.result strong{
+    color:#a99aff
+}
+
+.history{
+    margin-top:15px;
+    color:#999;
+    font-size:12px;
+    max-height:130px;
+    overflow:auto
+}
+
+.history div{
+    padding:7px 0;
+    border-bottom:1px solid #ffffff08
+}
+
+@media(max-width:600px){
+    body{
+        padding:12px
+    }
+
+    .panel{
+        padding:15px;
+        border-radius:22px
+    }
+
+    .form{
+        grid-template-columns:1fr
+    }
+
+    .scientific{
+        grid-template-columns:repeat(4,1fr)
+    }
+
+    .scientific button:last-child{
+        grid-column:span 2
+    }
+
+    .current{
+        font-size:35px
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+    <div class="logo">⚡ Omni<span>Calc</span></div>
+    <div class="tag">ALL-IN-ONE</div>
+</header>
+
+<div class="tabs">
+    <button class="tab active" data-tab="basic">🧮 Basic</button>
+    <button class="tab" data-tab="scientific">🔬 Scientific</button>
+    <button class="tab" data-tab="gst">🇮🇳 GST</button>
+    <button class="tab" data-tab="discount">🏷️ Discount</button>
+    <button class="tab" data-tab="percentage">％ Percentage</button>
+    <button class="tab" data-tab="emi">💳 EMI</button>
+    <button class="tab" data-tab="age">🎂 Age</button>
+    <button class="tab" data-tab="units">📏 Units</button>
+</div>
+
+<section class="panel active" id="basic">
+<h2>Basic Calculator</h2>
+
+<div class="display">
+    <div class="prev" id="bprev"></div>
+    <div class="current" id="bcurrent">0</div>
+</div>
+
+<div class="keys">
+<button data-b="clear">AC</button>
+<button data-b="delete">⌫</button>
+<button data-b="percent">%</button>
+<button class="op" data-bop="/">÷</button>
+
+<button data-bn="7">7</button>
+<button data-bn="8">8</button>
+<button data-bn="9">9</button>
+<button class="op" data-bop="*">×</button>
+
+<button data-bn="4">4</button>
+<button data-bn="5">5</button>
+<button data-bn="6">6</button>
+<button class="op" data-bop="-">−</button>
+
+<button data-bn="1">1</button>
+<button data-bn="2">2</button>
+<button data-bn="3">3</button>
+<button class="op" data-bop="+">+</button>
+
+<button data-b="sign">±</button>
+<button data-bn="0">0</button>
+<button data-b="decimal">.</button>
+<button class="eq" data-b="equals">=</button>
+</div>
+
+<div class="history" id="basicHistory"></div>
+</section>
+
+<section class="panel" id="scientific">
+<h2>Scientific Calculator</h2>
+
+<div class="display">
+    <div class="prev" id="sprev"></div>
+    <div class="current" id="scurrent">0</div>
+</div>
+
+<div class="scientific">
+<button data-s="sin">sin</button>
+<button data-s="cos">cos</button>
+<button data-s="tan">tan</button>
+<button data-s="sqrt">√</button>
+<button data-s="square">x²</button>
+<button data-s="cube">x³</button>
+<button data-s="log">log</button>
+<button data-s="ln">ln</button>
+<button data-s="pi">π</button>
+<button data-s="fact">n!</button>
+</div>
+
+<div class="keys">
+<button data-s="clear">AC</button>
+<button data-s="delete">⌫</button>
+<button data-s="percent">%</button>
+<button class="op" data-sop="/">÷</button>
+
+<button data-sn="7">7</button>
+<button data-sn="8">8</button>
+<button data-sn="9">9</button>
+<button class="op" data-sop="*">×</button>
+
+<button data-sn="4">4</button>
+<button data-sn="5">5</button>
+<button data-sn="6">6</button>
+<button class="op" data-sop="-">−</button>
+
+<button data-sn="1">1</button>
+<button data-sn="2">2</button>
+<button data-sn="3">3</button>
+<button class="op" data-sop="+">+</button>
+
+<button data-s="sign">±</button>
+<button data-sn="0">0</button>
+<button data-s="decimal">.</button>
+<button class="eq" data-s="equals">=</button>
+</div>
+</section>
+
+<section class="panel" id="gst">
+<h2>GST Calculator 🇮🇳</h2>
+
+<div class="form">
+<div class="field">
+<label>Amount (₹)</label>
+<input id="gstAmount" type="number" placeholder="1000">
+</div>
+
+<div class="field">
+<label>GST Rate</label>
+<select id="gstRate">
+<option value="5">5%</option>
+<option value="12">12%</option>
+<option value="18" selected>18%</option>
+<option value="28">28%</option>
+</select>
+</div>
+</div>
+
+<button class="calculate" id="gstBtn">Calculate GST</button>
+<div class="result" id="gstResult">Enter amount and rate.</div>
+</section>
+
+<section class="panel" id="discount">
+<h2>Discount Calculator 🏷️</h2>
+
+<div class="form">
+<div class="field">
+<label>Original Price (₹)</label>
+<input id="price" type="number" placeholder="2000">
+</div>
+
+<div class="field">
+<label>Discount (%)</label>
+<input id="discountRate" type="number" placeholder="20">
+</div>
+</div>
+
+<button class="calculate" id="discountBtn">Calculate Discount</button>
+<div class="result" id="discountResult">Enter price and discount.</div>
+</section>
+
+<section class="panel" id="percentage">
+<h2>Percentage Calculator ％</h2>
+
+<div class="form">
+<div class="field">
+<label>Value</label>
+<input id="pValue" type="number" placeholder="45">
+</div>
+
+<div class="field">
+<label>Total</label>
+<input id="pTotal" type="number" placeholder="60">
+</div>
+</div>
+
+<button class="calculate" id="percentBtn">Calculate</button>
+<div class="result" id="percentResult">
+What percentage is one number of another?
+</div>
+</section>
+
+<section class="panel" id="emi">
+<h2>EMI Calculator 💳</h2>
+
+<div class="form">
+<div class="field">
+<label>Loan Amount (₹)</label>
+<input id="loan" type="number" placeholder="500000">
+</div>
+
+<div class="field">
+<label>Annual Interest (%)</label>
+<input id="interest" type="number" step="0.01" placeholder="8.5">
+</div>
+
+<div class="field">
+<label>Tenure (Years)</label>
+<input id="years" type="number" placeholder="5">
+</div>
+</div>
+
+<button class="calculate" id="emiBtn">Calculate EMI</button>
+<div class="result" id="emiResult">Enter loan details.</div>
+</section>
+
+<section class="panel" id="age">
+<h2>Age Calculator 🎂</h2>
+
+<div class="form">
+<div class="field">
+<label>Date of Birth</label>
+<input id="dob" type="date">
+</div>
+
+<div class="field">
+<label>Calculate Until</label>
+<input id="ageDate" type="date">
+</div>
+</div>
+
+<button class="calculate" id="ageBtn">Calculate Age</button>
+<div class="result" id="ageResult">Select your dates.</div>
+</section>
+
+<section class="panel" id="units">
+<h2>Unit Converter 📏</h2>
+
+<div class="form">
+<div class="field">
+<label>Category</label>
+<select id="unitCategory">
+<option value="length">Length</option>
+<option value="weight">Weight</option>
+<option value="temperature">Temperature</option>
+<option value="data">Data</option>
+</select>
+</div>
+
+<div class="field">
+<label>Value</label>
+<input id="unitValue" type="number" placeholder="10">
+</div>
+
+<div class="field">
+<label>From</label>
+<select id="unitFrom"></select>
+</div>
+
+<div class="field">
+<label>To</label>
+<select id="unitTo"></select>
+</div>
+</div>
+
+<button class="calculate" id="unitBtn">Convert</button>
+<div class="result" id="unitResult">Choose units.</div>
+</section>
+
+</div>
+
+<script>
+/* ---------------- TABS ---------------- */
+
+document.querySelectorAll(".tab").forEach(tab=>{
+    tab.addEventListener("click",()=>{
+        document.querySelectorAll(".tab")
+        .forEach(t=>t.classList.remove("active"));
+
+        document.querySelectorAll(".panel")
+        .forEach(p=>p.classList.remove("active"));
+
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.tab)
+        .classList.add("active");
+    });
+});
+
+
+/* ---------------- BASIC CALCULATOR ---------------- */
+
+let bc="0", bp="", bop=null, br=false;
+
+const bcurrent=document.getElementById("bcurrent");
+const bprev=document.getElementById("bprev");
+
+function bdisplay(){
+    bcurrent.textContent=bc;
+    bprev.textContent=bop && bp ? bp+" "+bop : "";
+}
+
+function bnumber(n){
+    if(br || bc==="Error"){
+        bc=n;
+        br=false;
+    }else{
+        bc=bc==="0"?n:bc+n;
+    }
+    bdisplay();
+}
+
+function bdecimal(){
+    if(br){
+        bc="0.";
+        br=false;
+    }
+    else if(!bc.includes(".")){
+        bc+=".";
+    }
+    bdisplay();
+}
+
+function boperator(o){
+    if(bc==="Error")return;
+
+    if(bop && !br)bequals(false);
+
+    bp=bc;
+    bop=o;
+    br=true;
+    bdisplay();
+}
+
+function bequals(save=true){
+    if(!bop||!bp)return;
+
+    let a=Number(bp),b=Number(bc),r;
+
+    if(bop==="+")r=a+b;
+    if(bop==="-")r=a-b;
+    if(bop==="*")r=a*b;
+
+    if(bop==="/"){
+        if(b===0){
+            bc="Error";
+            bop=null;
+            br=true;
+            bdisplay();
+            return;
+        }
+        r=a/b;
+    }
+
+    r=Number(r.toPrecision(12));
+
+    if(save){
+        const h=document.getElementById("basicHistory");
+
+        h.innerHTML=
+        `<div>${a} ${bop} ${b} = <b>${r}</b></div>`
+        +h.innerHTML;
+    }
+
+    bc=String(r);
+    bp="";
+    bop=null;
+    br=true;
+    bdisplay();
+}
+
+document.querySelectorAll("[data-bn]").forEach(x=>{
+    x.onclick=()=>bnumber(x.dataset.bn);
+});
+
+document.querySelectorAll("[data-bop]").forEach(x=>{
+    x.onclick=()=>boperator(x.dataset.bop);
+});
+
+document.querySelectorAll("[data-b]").forEach(x=>{
+    x.onclick=()=>{
+        const a=x.dataset.b;
+
+        if(a==="clear"){
+            bc="0";
+            bp="";
+            bop=null;
+            br=false;
+        }
+
+        if(a==="delete")
+            bc=bc.length>1?bc.slice(0,-1):"0";
+
+        if(a==="decimal")bdecimal();
+
+        if(a==="equals")bequals();
+
+        if(a==="percent")
+            bc=String(Number(bc)/100);
+
+        if(a==="sign"&&bc!=="0")
+            bc=bc.startsWith("-")?bc.slice(1):"-"+bc;
+
+        bdisplay();
+    };
+});
+
+
+/* ---------------- SCIENTIFIC ---------------- */
+
+let sc="0", sp="", sop=null, sr=false;
+
+const scurrent=document.getElementById("scurrent");
+const sprev=document.getElementById("sprev");
+
+function sdisplay(){
+    scurrent.textContent=sc;
+    sprev.textContent=sop&&sp?sp+" "+sop:"";
+}
+
+function snumber(n){
+    if(sr){
+        sc=n;
+        sr=false;
+    }
+    else sc=sc==="0"?n:sc+n;
+
+    sdisplay();
+}
+
+function sdecimal(){
+    if(sr){
+        sc="0.";
+        sr=false;
+    }
+    else if(!sc.includes(".")){
+        sc+=".";
+    }
+
+    sdisplay();
+}
+
+function soperator(o){
+    if(sop&&!sr)sequals(false);
+
+    sp=sc;
+    sop=o;
+    sr=true;
+    sdisplay();
+}
+
+function factorial(n){
+    if(n<0||n>170)return NaN;
+
+    let r=1;
+
+    for(let i=2;i<=Math.floor(n);i++)
+        r*=i;
+
+    return r;
+}
+
+function sequals(){
+    if(!sop||!sp)return;
+
+    let a=Number(sp),b=Number(sc),r;
+
+    if(sop==="+")r=a+b;
+    if(sop==="-")r=a-b;
+    if(sop==="*")r=a*b;
+    if(sop==="/")r=b===0?NaN:a/b;
+
+    if(!Number.isFinite(r)){
+        sc="Error";
+    }
+    else{
+        sc=String(Number(r.toPrecision(12)));
+    }
+
+    sp="";
+    sop=null;
+    sr=true;
+    sdisplay();
+}
+
+document.querySelectorAll("[data-sn]").forEach(x=>{
+    x.onclick=()=>snumber(x.dataset.sn);
+});
+
+document.querySelectorAll("[data-sop]").forEach(x=>{
+    x.onclick=()=>soperator(x.dataset.sop);
+});
+
+document.querySelectorAll("[data-s]").forEach(x=>{
+    x.onclick=()=>{
+        const a=x.dataset.s;
+
+        if(a==="clear"){
+            sc="0";
+            sp="";
+            sop=null;
+            sr=false;
+        }
+
+        else if(a==="delete")
+            sc=sc.length>1?sc.slice(0,-1):"0";
+
+        else if(a==="decimal")
+            sdecimal();
+
+        else if(a==="equals")
+            sequals();
+
+        else if(a==="percent")
+            sc=String(Number(sc)/100);
+
+        else if(a==="sign"&&sc!=="0")
+            sc=sc.startsWith("-")?sc.slice(1):"-"+sc;
+
+        else{
+            const n=Number(sc);
+            let r;
+
+            if(a==="sin")r=Math.sin(n*Math.PI/180);
+            if(a==="cos")r=Math.cos(n*Math.PI/180);
+            if(a==="tan")r=Math.tan(n*Math.PI/180);
+            if(a==="sqrt")r=Math.sqrt(n);
+            if(a==="square")r=n*n;
+            if(a==="cube")r=n*n*n;
+            if(a==="log")r=Math.log10(n);
+            if(a==="ln")r=Math.log(n);
+            if(a==="pi")r=Math.PI;
+            if(a==="fact")r=factorial(n);
+
+            if(r!==undefined){
+                sc=Number.isFinite(r)
+                    ?String(Number(r.toPrecision(12)))
+                    :"Error";
+
+                sr=true;
+            }
+        }
+
+        sdisplay();
+    };
+});
+
+
+/* ---------------- GST ---------------- */
+
+document.getElementById("gstBtn").onclick=()=>{
+    const amount=Number(
+        document.getElementById("gstAmount").value
+    );
+
+    const rate=Number(
+        document.getElementById("gstRate").value
+    );
+
+    if(amount<0)return;
+
+    const tax=amount*rate/100;
+    const total=amount+tax;
+
+    document.getElementById("gstResult").innerHTML=
+        `GST Amount: <strong>₹${tax.toFixed(2)}</strong><br>
+         Final Price: <strong>₹${total.toFixed(2)}</strong>`;
+};
+
+
+/* ---------------- DISCOUNT ---------------- */
+
+document.getElementById("discountBtn").onclick=()=>{
+    const price=Number(
+        document.getElementById("price").value
+    );
+
+    const rate=Number(
+        document.getElementById("discountRate").value
+    );
+
+    const saved=price*rate/100;
+    const final=price-saved;
+
+    document.getElementById("discountResult").innerHTML=
+        `You Save: <strong>₹${saved.toFixed(2)}</strong><br>
+         Final Price: <strong>₹${final.toFixed(2)}</strong>`;
+};
+
+
+/* ---------------- PERCENTAGE ---------------- */
+
+document.getElementById("percentBtn").onclick=()=>{
+    const value=Number(
+        document.getElementById("pValue").value
+    );
+
+    const total=Number(
+        document.getElementById("pTotal").value
+    );
+
+    if(total===0){
+        document.getElementById("percentResult")
+        .textContent="Total cannot be zero.";
+        return;
+    }
+
+    const result=value/total*100;
+
+    document.getElementById("percentResult").innerHTML=
+        `<strong>${result.toFixed(2)}%</strong>`;
+};
+
+
+/* ---------------- EMI ---------------- */
+
+document.getElementById("emiBtn").onclick=()=>{
+    const P=Number(document.getElementById("loan").value);
+    const annual=Number(document.getElementById("interest").value);
+    const years=Number(document.getElementById("years").value);
+
+    const r=annual/12/100;
+    const n=years*12;
+
+    let emi;
+
+    if(r===0)
+        emi=P/n;
+    else
+        emi=P*r*Math.pow(1+r,n)/
+        (Math.pow(1+r,n)-1);
+
+    const total=emi*n;
+    const interest=total-P;
+
+    document.getElementById("emiResult").innerHTML=
+        `Monthly EMI: <strong>₹${emi.toFixed(2)}</strong><br>
+         Total Interest: <strong>₹${interest.toFixed(2)}</strong><br>
+         Total Payment: <strong>₹${total.toFixed(2)}</strong>`;
+};
+
+
+/* ---------------- AGE ---------------- */
+
+const today=new Date();
+
+document.getElementById("ageDate").value=
+    today.toISOString().split("T")[0];
+
+document.getElementById("ageBtn").onclick=()=>{
+    const dob=new Date(
+        document.getElementById("dob").value
+    );
+
+    const end=new Date(
+        document.getElementById("ageDate").value
+    );
+
+    if(isNaN(dob)||isNaN(end)){
+        document.getElementById("ageResult")
+        .textContent="Select both dates.";
+        return;
+    }
+
+    let years=end.getFullYear()-dob.getFullYear();
+    let months=end.getMonth()-dob.getMonth();
+    let days=end.getDate()-dob.getDate();
+
+    if(days<0){
+        months--;
+
+        const previousMonth=
+            new Date(end.getFullYear(),end.getMonth(),0);
+
+        days+=previousMonth.getDate();
+    }
+
+    if(months<0){
+        years--;
+        months+=12;
+    }
+
+    if(years<0){
+        document.getElementById("ageResult")
+        .textContent="Invalid dates.";
+        return;
+    }
+
+    document.getElementById("ageResult").innerHTML=
+        `<strong>${years}</strong> years,
+         <strong>${months}</strong> months,
+         <strong>${days}</strong> days`;
+};
+
+
+/* ---------------- UNIT CONVERTER ---------------- */
+
+const units={
+    length:{
+        "Meter":1,
+        "Kilometer":1000,
+        "Centimeter":0.01,
+        "Millimeter":0.001,
+        "Mile":1609.344,
+        "Foot":0.3048,
+        "Inch":0.0254
+    },
+
+    weight:{
+        "Kilogram":1,
+        "Gram":0.001,
+        "Milligram":0.000001,
+        "Pound":0.45359237,
+        "Ounce":0.0283495
+    },
+
+    temperature:{
+        "Celsius":"C",
+        "Fahrenheit":"F",
+        "Kelvin":"K"
+    },
+
+    data:{
+        "Byte":1,
+        "Kilobyte":1024,
+        "Megabyte":1024**2,
+        "Gigabyte":1024**3,
+        "Terabyte":1024**4
+    }
+};
+
+function loadUnits(){
+    const cat=document.getElementById("unitCategory").value;
+    const from=document.getElementById("unitFrom");
+    const to=document.getElementById("unitTo");
+
+    from.innerHTML="";
+    to.innerHTML="";
+
+    Object.keys(units[cat]).forEach(u=>{
+        from.innerHTML+=`<option>${u}</option>`;
+        to.innerHTML+=`<option>${u}</option>`;
+    });
+
+    if(to.options.length>1)
+        to.selectedIndex=1;
+}
+
+loadUnits();
+
+document.getElementById("unitCategory").onchange=loadUnits;
+
+document.getElementById("unitBtn").onclick=()=>{
+    const cat=document.getElementById("unitCategory").value;
+    const value=Number(
+        document.getElementById("unitValue").value
+    );
+
+    const from=document.getElementById("unitFrom").value;
+    const to=document.getElementById("unitTo").value;
+
+    let result;
+
+    if(cat==="temperature"){
+        let c;
+
+        if(from==="Celsius")c=value;
+        if(from==="Fahrenheit")c=(value-32)*5/9;
+        if(from==="Kelvin")c=value-273.15;
+
+        if(to==="Celsius")result=c;
+        if(to==="Fahrenheit")result=c*9/5+32;
+        if(to==="Kelvin")result=c+273.15;
+    }
+    else{
+        const base=value*units[cat][from];
+        result=base/units[cat][to];
+    }
+
+    document.getElementById("unitResult").innerHTML=
+        `<strong>${Number(result.toPrecision(10))} ${to}</strong>`;
+};
+
+
+/* ---------------- KEYBOARD SUPPORT ---------------- */
+
+document.addEventListener("keydown",e=>{
+    const basic=
+        document.getElementById("basic")
+        .classList.contains("active");
+
+    if(!basic)return;
+
+    if(/^[0-9]$/.test(e.key))
+        bnumber(e.key);
+
+    else if(e.key===".")bdecimal();
+
+    else if(["+","-","*","/"].includes(e.key))
+        boperator(e.key);
+
+    else if(e.key==="Enter"||e.key==="=")
+        bequals();
+
+    else if(e.key==="Backspace"){
+        bc=bc.length>1?bc.slice(0,-1):"0";
+        bdisplay();
+    }
+
+    else if(e.key==="Escape"){
+        bc="0";
+        bp="";
+        bop=null;
+        br=false;
+        bdisplay();
+    }
+});
+</script>
+
+</body>
+</html>
